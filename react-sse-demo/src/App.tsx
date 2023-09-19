@@ -5,43 +5,41 @@ import { formatPrice } from "./utils/formatPrice";
 
 export const BaseURL = "http://localhost:8000";
 
-type StockPrice = {
+type ExchangeOrder = {
+  type: "exchange-order";
   id: number;
   ticker: string;
   price: number;
 };
 
+type ClientOrder = {
+  type: "client-order";
+  id: number;
+  ticker: string;
+  price: number;
+  client: string;
+};
+
+type StockPrice = ExchangeOrder | ClientOrder;
+
 function App() {
   const [stockPrices, setStockPrices] = useState<StockPrice[]>([]);
-  const { data } = useServerEvents<StockPrice>();
-
-  //Fetch initial data
-  const fetchStockPrice = () => {
-    fetch(`${BaseURL}/stocks`, { method: "GET" })
-      .then((res) => (res.status === 200 ? res.json() : { data: null }))
-      .then((result) => setStockPrices(result.data));
-  };
+  const [exchangeOrder] = useServerEvents<ClientOrder>("client-order");
 
   const updateStockPrices = (data: StockPrice) => {
-    setStockPrices((stockPrices) =>
-      [...stockPrices].map((stock) => {
-        if (stock.id === data.id) {
-          return data;
-        }
-        return stock;
-      }),
-    );
+    setStockPrices((stockPrices) => {
+      return [
+        ...stockPrices.filter((value) => value.ticker !== data.ticker),
+        data,
+      ].sort((a, b) => a.id - b.id);
+    });
   };
 
   useEffect(() => {
-    fetchStockPrice();
-  }, []);
-
-  useEffect(() => {
-    if (data) {
-      updateStockPrices(data);
+    if (exchangeOrder) {
+      updateStockPrices(exchangeOrder);
     }
-  }, [data]);
+  }, [exchangeOrder]);
 
   return (
     <div className="App">

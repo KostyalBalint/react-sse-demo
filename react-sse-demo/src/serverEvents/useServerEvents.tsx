@@ -1,16 +1,18 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { ServerEventsContext } from "./ServerEventsProvider";
 
-export interface ProcessingResult<T> {
-  data: T | undefined;
-}
+type ServerEventBase = { type: string; [key: string]: unknown };
 
-export const useServerEvents = <T extends object>(): ProcessingResult<T> => {
+export type ProcessingResult<T extends ServerEventBase> = [T | undefined];
+
+export const useServerEvents = <T extends ServerEventBase>(
+  requiredEvent: T["type"],
+): ProcessingResult<T> => {
   const [eventData, setEventData] = useState<T>();
 
   const eventSource = useContext(ServerEventsContext);
 
-  if (!eventSource) {
+  if (!eventSource.url) {
     throw new Error(
       `To use "useServerEvents()" wrap your application in provider "ServerEventsProvider"`,
     );
@@ -18,10 +20,9 @@ export const useServerEvents = <T extends object>(): ProcessingResult<T> => {
 
   eventSource.onmessage = (event) => {
     const data = JSON.parse(event.data);
+    if (data.type !== requiredEvent) return;
     setEventData(data);
   };
 
-  return {
-    data: eventData,
-  };
+  return [eventData];
 };

@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  PropsWithChildren,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { createContext, PropsWithChildren, useMemo } from "react";
 
 export interface ServerEventsContextValue extends EventSource {}
 

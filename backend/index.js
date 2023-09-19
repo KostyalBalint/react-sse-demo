@@ -5,9 +5,9 @@ const app = express();
 app.use(cors());
 const PORT = 8000;
 const stocks = [
-    { id: 1, ticker: "AAPL", price: 497.48 },
-    { id: 2, ticker: "MSFT", price: 213.02 },
-    { id: 3, ticker: "AMZN", price: 3284.72 },
+    { id: 1, ticker: "AAPL", price: 497.48, type: 'exchange-order' },
+    { id: 2, ticker: "MSFT", price: 213.02, type: 'exchange-order' },
+    { id: 3, ticker: "AMZN", price: 3284.72, type: 'client-order', client: 'John Doe' },
 ];
 function getRandomStock() {
     return Math.round(Math.random() * (2 - 0) + 0);
@@ -31,7 +31,7 @@ app.get("/realtime-price", function (req, res) {
             JSON.stringify({ ...stocks[getRandomStock()], price: getRandomPrice() })
         );
         res.write("\n\n");
-    }, 1000);
+    }, 100);
 });
 app.listen(PORT, function () {
     console.log(`Server is running on ${PORT}`);
