@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import { useServerEvents } from "./serverEvents/useServerEvents";
 import { formatPrice } from "./utils/formatPrice";
+import { useEventFetch } from "./serverEvents/useEventFetch";
 
 export const BaseURL = "http://localhost:8000";
 
@@ -25,6 +26,13 @@ type StockPrice = ExchangeOrder | ClientOrder;
 function App() {
   const [stockPrices, setStockPrices] = useState<StockPrice[]>([]);
   const [exchangeOrder] = useServerEvents<ClientOrder>("client-order");
+
+  const clientOrders = useEventFetch<StockPrice>({
+    fetchInterval: 1000,
+    initialUrl: `${BaseURL}/client-orders`,
+    diffUrl: `${BaseURL}/client-orders-diff`,
+    mapIdField: "id",
+  });
 
   const updateStockPrices = (data: StockPrice) => {
     setStockPrices((stockPrices) => {
